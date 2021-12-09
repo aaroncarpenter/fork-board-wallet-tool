@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset = "UTF-8">
+      <title>ForkBoard</title>
+      <link rel = "stylesheet" href = "../bower_components/bootstrap/dist/css/bootstrap.min.css" />
+      <link rel = "stylesheet" href = "./css/forkboard.css" />
+
+      <script src="https://kit.fontawesome.com/80792d13b7.js" crossorigin="anonymous"></script>
+      
+   </head>
+   
+   <body>
+      <div class = "container-fluid">
+         <p></p>
+         <div class="d-flex flex-row align-items-center">
+            <div class="btn-group btn-group-sm col-md-4" role="group">
+               <button type="button" id="show-actual-balance" class="btn btn-primary btn-small"><small>Show Actual Balances</small></button>
+               <button type="button" id="show-recoverable-balance" class="btn btn-secondary btn-small"><small>Show Recoverable Balances</small></button>
+            </div>
+            <div class="d-flex align-items-end flex-column col-md-3">
+               
+            </div>
+            <div class="d-flex align-items-end flex-column col-md-2">
+               <div>
+                  <small class="small-caps text-muted"><span id="total-balance-type">Actual</span> Balance Total</small>
+               </div>
+            </div>
+            <div class="d-flex align-items-center flex-column col-md-2">
+               <div>
+                  <h3 id="overallBalance"></h3>
+               </div>
+            </div>
+            <div class="d-flex align-items-end flex-column col-md-1">
+               <div>
+                  <div id='theme-selector' style="display: none; padding-right: 5px;"">
+                     <i id="show-dark-mode" class="fas fa-sun" data-toggle="tooltip" title="Show Dark Mode"></i>
+                     <i id="show-light-mode" class="fas fa-moon" data-toggle="tooltip" title="Show Light Mode"></i>
+                  </div>
+               </div>
+               <div>
+                  <div id="sort-dropdown" class="dropbtn dropdown" style="width: 100%; padding-right: 5px;"><small id="sort-dropdown-text"></small> 
+                     <div id="sort-dropdown-content" class="dropdown-content">
+                        <button  type="button" class="btn" style="width: 100%; padding-top: 5px; padding-bottom: 5px;" onclick="updateSortOrder('name')"><small>Name</small></button>
+                        <button  type="button" class="btn" style="width: 100%; padding-top: 5px; padding-bottom: 5px;" onclick="updateSortOrder('coins')"><small>Coins</small></button>
+                        <button  type="button" class="btn" style="width: 100%; padding-top: 5px; padding-bottom: 5px;" onclick="updateSortOrder('usd')"><small>USD</small></button>
+                        <button  type="button" class="btn" style="width: 100%; padding-top: 5px; padding-bottom: 5px;" onclick="updateSortOrder('none')"><small>None</small></button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div id="infoAlertBox" class="alert alert-info" style="display: none" role="alert"></div>
+         <div id="warnAlertBox" class="alert alert-warning" style="display: none" role="alert"></div>
+         <div id="errorAlertBox" class="alert alert-primary" style="display: none" role="alert">
+            <span id="errorAlertMessage"></span> 
+            <br />
+            <br />
+            <span id="errorAlertInstructions"></span>
+         </div>
+         <div id="no-wallets-found" class="alert alert-info" style="display: none" role="alert">
+            <small class="text-muted">No wallets found.  Restore a Backup file or Select "Add Wallet" on the File menu to add your first wallet.</small>
+         </div>
+         <div id="add-wallet" class="alert alert-info" style="display: none" role="alert">
+            <form>
+               <div class="form-group row d-flex align-items-center">
+                  <div class="col-sm-11">
+                     <input type="text" name="Wallet" value="" id="wallet-text-box" placeholder="You can enter multiple wallets separated by commas.  Click the clipboard to Paste, the check to Save or the X to cancel." class="form-control" required >
+                  </div>
+                  <div class="col-sm-1">
+                     <nobr>
+                        <i class="fas fa-paste" id="paste-wallet-from-clipboard" title="Click to Paste from the Clipboard"></i> &nbsp;
+                        <i class = "fas fa-check" id = "check-add-wallet" title="Click to Save"></i> &nbsp;
+                        <i class = "fas fa-times" id = "cancel-add-wallet" title="Click to Cancel"></i>
+                     </nobr>
+                  </div>
+               </div>
+            </form>
+         </div>
+         <div id="set-launcher" class="alert alert-info" style="display: none" role="alert">
+            <form>
+               <div class="form-group row d-flex align-items-center">
+                  <div class="col-sm-11">
+                     <input type="text" name="Launcher" value="" id="launcher-text-box" placeholder="Enter LauncherId to view Recoverable Balances.  Click the checkmark to Save." class="form-control" required>
+                  </div>
+
+                  <div class="col-sm-1">
+                     <nobr>
+                        <i class="fas fa-paste" id="paste-launcher-from-clipboard" title="Click to Paste from the Clipboard"></i> &nbsp;
+                        <i class="fas fa-check" id="add-launcher" title="Click to Save"></i>&nbsp;
+                        <i class="fas fa-times" id="cancel-add-launcher" title="Click to Cancel"></i>
+                     </nobr>
+                  </div>
+               </div>
+            </form>
+         </div>
+         
+         <div id="nft-recovery" style="display: none">
+            <div class="d-flex flex-row">
+               <div class="alert alert-info col-md-6" role="alert">
+                  <div id="launcher-dropdown" style="width: 100%" class="dropdown">
+                     <div id="launcher-dropdown-button" class="btn btn-primary dropbtn" style="width: 100%"><small>Launcher</small></div>
+                     <div class="dropdown-content"></div>
+                  </div>
+               </div>
+               <div class="alert alert-info col-md-6" role="alert">
+                  <div class="d-flex justify-content-center" style="width: 100%">
+                     <button class="btn btn-primary" id="open-nft-recovery" style="width: 75%"><small>Open AllTheBlocks.NET NFT Recovery Site</small></button>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <p />
+         <div id="wallet-cards" class="d-flex row justify-content-center" style="vertical-align:bottom"></div>
+         <div id="pageLoadingSpinner" class="d-flex column justify-content-center align-items-end" style="height: 450px; vertical-align:bottom;">
+            <div class="spinner-border" role="status" style="width: 4rem; height: 4rem;"> </div>
+         </div>
+         <div id="refreshDiv" style="display: none;" class="d-flex align-items-end flex-column">
+            <div class="form-check form-switch">
+               <input class="form-check-input" type="checkbox" id="autoRefreshCheck" onclick="autoRefreshHandler();" title="Every 5 mins" />
+               <label class="form-check-label" for="flexSwitchCheckDefault" title="Every 5 mins"><small class="text-muted">Auto-Refresh</small></label>
+            </div>
+            <div id="lastRefreshDate" class="d-flex justify-content-end">
+               <small class="text-muted font-italic font-weight-light"></small>
+            </div>
+        </div>
+      </div>   
+      <script src="../bower_components/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+      <script src = "./view.js" ></script>
+   </body>
+</html>

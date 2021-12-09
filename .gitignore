@@ -1,0 +1,8 @@
+node_modules
+out
+dist
+logs   
+assets/config/wallets_amc.json
+assets/config/wallets_phil.json
+assets/config/wallets.json
+assets/config/clientconfig.json
