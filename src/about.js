@@ -2,7 +2,7 @@
 const {ipcRenderer} = require('electron');
 const logger = require('electron-log');
 const path = require('path');
-logger.transports.file.resolvePath = () => path.join(__dirname, 'logs/about.log');
+logger.transports.file.resolvePath = () => path.join(__dirname, '../logs/about.log');
 let $ = require('jquery');
 const DisplayTheme = {
    Dark: 'Dark',
@@ -44,7 +44,7 @@ ipcRenderer.on('load-about-page', (event, arg) => {
       let processArch = arg[3];
       let platform = (processPlatform == 'darwin' ? 'MacOS' : (processPlatform == 'win32' ? "Windows" :  (processPlatform == 'linux' ? "Linux" : processPlatform)));
 
-      $('#appName').text(`ForkBoard v${version}`);
+      $('#appName').text(`ForkBoard Wallet Tool v${version}`);
 
       $('#appPlatform').text(`for ${platform} (${processArch})`);
 

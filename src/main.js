@@ -11,33 +11,43 @@ const {
 const url = require('url');
 const path = require('path');
 const axios = require('axios');
+const fs = require('fs');
 const https = require('https');
 const logger = require('electron-log');
-logger.transports.file.resolvePath = function () {
-   return path.join(__dirname, 'logs/main.log');
-};
+const sqlite3 = require('sqlite3').verbose();
+let { bech32, bech32m } = require('bech32');
+
+let logPath = path.resolve(__dirname, '../logs');
+// Create log folder if missing
+if (!fs.existsSync(logPath)) {
+   fs.mkdirSync(logPath);
+}
+
+logger.transports.file.resolvePath = () => path.join(__dirname, '../logs/main.log');
 
 axios.defaults.timeout = 30000;
 axios.defaults.httpsAgent = new https.Agent({ 
    rejectUnauthorized: false,
    keepAlive: true 
 });
+axios.defaults.headers.post['Content-Type'] = 'application/json';
+
+const baseAllTheBlocksApiUrl = "https://api.alltheblocks.net";
+const baseForkBoardApi = "https://fork-board-api-mgmt.azure-api.net";
 
 // #endregion
 
-// quit if startup from squirrel installation.
-if (require('electron-squirrel-startup')) return app.quit();
-
-let appIcon = nativeImage.createFromPath('assets/icons/fork-board-gray.png');
+let appIcon = nativeImage.createFromPath('assets/icons/fork-board-wallet-tool-gray.png');
 let displayTheme;
 
 // #region Main Window
 let win;
 
 function createWindow() {
+   logger.info('Inside CreateWindow() function');
    win = new BrowserWindow({
-      width: 1500,
-      height: 1200,
+      width: 1200,
+      height: 600,
       webPreferences: {
          nodeIntegration: true,
          contextIsolation: false,
@@ -45,6 +55,7 @@ function createWindow() {
       },
       icon: appIcon
    });
+   logger.info(`Loading ${path.join(__dirname, 'index.html')}`);
    win.loadURL(url.format({
       pathname: path.join(__dirname, 'index.html'),
       protocol: 'file:',
@@ -59,8 +70,8 @@ let aboutPage;
 function createAboutWindow() {
    logger.info('Creating the About window');
    aboutPage = new BrowserWindow({
-      width: 500,
-      height: 410,
+      width: 550,
+      height: 400,
       modal: true,
       show: false,
       parent: win, // Make sure to add parent window here
@@ -124,38 +135,90 @@ ipcMain.on('async-get-blockchain-settings', function (event, _arg) {
 });
 
 // ************************
-// Purpose: This function handles the async-get-fork-prices event from the Renderer.  It retrieves the fork prices from XCHForks.com and sends the reply event with the data to the Renderer.
+// Purpose: This function handles retrieving the wallet addresses
 // ************************
-ipcMain.on('async-get-fork-prices', function (event, _arg) {
-   logger.info('Received async-get-fork-prices event');
- 
-   let url = `${baseForkBoardApi}/fork-board/price`;
-
-   logger.info(`Requesting data from ${url}`);
-   axios.get(url)
-   .then(function (result) {
-      logger.info('Sending async-get-fork-prices-reply event');
-      event.sender.send('async-get-fork-prices-reply', result.data);
-   })
-   .catch(function (error) {
-      logger.error(error.message);
-      event.sender.send('async-get-fork-prices-error', [error.message]);
-   });
+ipcMain.on('async-open-db-path-dialog', function (_event, arg) {
+   logger.info('Received async-open-db-path-dialog Event');
+   selectForkDBPath();
 });
 
 // ************************
-// Purpose: This function handles the async-get-fork-prices event from the Renderer.  It retrieves the fork prices from XCHForks.com and sends the reply event with the data to the Renderer.
+// Purpose: This function handles retrieving the wallet addresses
 // ************************
-ipcMain.on('load-main-dashboard', function (event, arg) {
-   logger.info('Received load-main-dashboard event');
+ipcMain.on('async-export-to-fork-board-import-file-action', function (_event, arg) {
+   logger.info('Received async-export-to-fork-board-import-file-action Event');
+   exportWalletToolDataFile();
+});
 
-   if (arg.length == 1) {
-      displayTheme = arg[0];
+// ************************
+// Purpose: This function handles retrieving the wallet addresses
+// ************************
+ipcMain.on('async-retrieve-wallet-addresses', function (event, arg) {
+   logger.info('Received async-retrieve-wallet-addresses Event');
+   
+   if (arg.length == 3) {
+      let coinDisplayName = arg[0].toLowerCase();
+      let coinPrefix = arg[1];
+      let dbFilename = arg[2];
+
+      // open the database
+      let db = new sqlite3.Database(dbFilename, sqlite3.OPEN_READWRITE, (err) => {
+         if (err) {
+            console.error(err.message);
+         }
+         console.log(`Connected to the ${dbFilename} database.`);
+      });
+
+      let posts = [];
+      let forkWalletName = "";
+
+      db.all(`SELECT id, name FROM users_wallets WHERE id = 1`, (err, rows) => {
+         if (err) {
+            console.error(err.message);
+         }
+         else {
+            rows.forEach(function (row) {
+               if (row.name != null) {
+                  forkWalletName = row.name.toLowerCase().replace("coin wallet", "");
+                  forkWalletName = forkWalletName.replace(" wallet", "");
+
+                  if (forkWalletName == coinDisplayName) {
+                     db.all(`SELECT puzzle_hash, wallet_type, wallet_id, used FROM derivation_paths WHERE used = 1`, function(err, rows) {
+                        if (err) {
+                           console.error(err.message);
+                        }
+                        else {
+                           rows.forEach(function (row) {
+                              convertPuzzleToWallet(coinPrefix, row.puzzle_hash);
+                           });
+                        }
+
+                        closeDb(db);
+                     });
+                  }
+                  else {
+                     let errMessage = `The selected ForkDB doesn't appear to match the selected Coin.  Selected Coin: ${coinDisplayName}, Selected Fork DB: ${forkWalletName}`;
+                     event.sender.send('async-retrieve-wallet-addresses-error', [errMessage]);
+                     
+                     closeDb(db);
+                  }
+               }
+            });
+         }
+          closeDb(db);
+      }); 
    }
-
-   logger.info('Sending load-main-dashboard-reply event');
-   event.sender.send('load-main-dashboard-reply', [app.getVersion(), process.platform, process.arch]);
 });
+
+function closeDb(db) {
+   db.close((err) => {
+      if (err) {
+         console.error(err.message);
+      }
+      console.log('Close the database connection.');
+   }); 
+}
+
 // #endregion
 
 //#region Menu Setup
@@ -164,49 +227,6 @@ const template = [
       id: 'fileMenu',
       label: 'File',
       submenu: [
-         {
-            label: 'Set Launcher Ids',
-            click() {
-               logger.info('Sending async-set-launcher event');
-               win.webContents.send('async-set-launcher', []);
-            },
-            accelerator: 'Alt+CmdOrCtrl+L'
-         },
-         {
-            label: 'Add Wallet',
-            click() {
-               logger.info('Sending async-add-wallet event');
-               win.webContents.send('async-add-wallet', []);
-            },
-            accelerator: 'Alt+CmdOrCtrl+A'
-         },
-         {
-            label: 'Refresh',
-            click() {
-               logger.info('Sending async-refresh-wallets event');
-               win.webContents.send('async-refresh-wallets', []);
-            },
-            accelerator: 'Alt+CmdOrCtrl+R'
-         },
-         {
-            type: 'separator'
-         },
-         {
-            label: 'Backup ForkBoard Settings',
-            click() {
-               backupWalletConfig();   
-            },
-            accelerator: 'Alt+CmdOrCtrl+B'
-         },
-         {
-            label: 'Restore ForkBoard Settings',
-            click() {
-               restoreWalletConfig();
-            }
-         },
-         {
-            type: 'separator'
-         },
          {
             role: 'close'
          }
@@ -238,54 +258,6 @@ const template = [
          },
          {
             role: 'togglefullscreen'
-         }
-      ]
-   },
-   {
-      label: 'Sponsors',
-      submenu: [
-         {
-            label: 'SpaceFarmers.io',
-            click() {
-               logger.info('Opening SpaceFarmers.IO page in Browser');
-               require("electron").shell.openExternal('https://spacefarmers.io');
-            }
-         }
-      ]
-   },
-   {
-      label: 'Partners',
-      submenu: [
-         {
-            label: 'AllTheBlock.NET',
-            click() {
-               logger.info('Opening AllTheBlock.NET page in Browser');
-               require("electron").shell.openExternal('https://alltheblocks.net');
-            }
-         },
-         {
-            type: 'separator'
-         },
-         {
-            label: 'Chia Forks Blockchain',
-            click() {
-               logger.info('Opening Chia Forks Blockchain page in Browser');
-               require("electron").shell.openExternal('https://chiaforksblockchain.com');
-            }
-         },
-         {
-            label: 'Forks Chia Exchanger',
-            click() {
-               logger.info('Opening Forks Chia Exchanger page in Browser');
-               require("electron").shell.openExternal('https://forkschiaexchange.com');
-            }
-         },
-         {
-            label: 'Casino Maize',
-            click() {
-               logger.info('Opening Casino Maize page in Browser');
-               require("electron").shell.openExternal('https://casino.maize.farm');
-            }
          }
       ]
    },
@@ -327,7 +299,7 @@ const template = [
             type: 'separator'
          },
          {
-            label: 'About ForkBoard',
+            label: 'About ForkBoard Wallet Tool',
             click() {
                createAboutWindow();
             }
@@ -344,7 +316,11 @@ Menu.setApplicationMenu(menu);
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+app.on('ready', function () {
+   logger.info('ready triggered');
+   logger.info('executing CreateWindow()');
+   createWindow();
+});
 
 app.on('window-all-closed', function () {
    if (process.platform !== 'darwin') {
@@ -353,39 +329,62 @@ app.on('window-all-closed', function () {
 });
 
 app.on('activate', function () {
+   logger.info('activate triggered');
    if (BrowserWindow.getAllWindows().length === 0) {
+      logger.info('executing CreateWindow()');
       createWindow();
    }
 });
 
-function backupWalletConfig() {
+function selectForkDBPath() {
    let filePaths = dialog.showOpenDialogSync(win, { 
-      title: 'Select a Backup Destination',
-      buttonLabel: 'Backup',
-      message: 'Please select the location to backup the wallet configuration',
-      properties: ['openDirectory'] 
-   });
-
-   if (filePaths != undefined) {
-         logger.info('Sending async-backup-wallet-config-action event');
-         win.webContents.send('async-backup-wallet-config-action', [filePaths[0]]); 
-   }
-}  
-
-function restoreWalletConfig() {
-   let filePaths = dialog.showOpenDialogSync(win, { 
-      title: 'Select a Wallet Backup to Restore',
-      buttonLabel: 'Restore',
-      message: 'Please select the wallet backup file to Restore',
+      title: 'Open File',
+      buttonLabel: 'Select',
+      message: 'Please select the chia/fork db file to Open',
       properties: ['openFile'],
       filters: [
-         { name: 'JSON', extensions: ['json'] },
-         { name: 'All Files', extensions: ['*'] }
+         { name: 'SQLite', extensions: ['sqlite'] }
        ] 
    });
 
    if (filePaths != undefined) {
-      logger.info('Sending async-restore-wallet-config-action event');
-      win.webContents.send('async-restore-wallet-config-action', [filePaths[0]]); 
+      var selectedPath = filePaths[0];
+      
+      if (fs.existsSync(selectedPath)) {
+         logger.info('Sending async-set-db-path-action event');
+         win.webContents.send('async-set-db-path-action', [selectedPath]); 
+      }
    }
 }  
+
+// ************************
+// Purpose: This function handles the retrieving the walleta address from the puzzle hash.
+// ************************
+function convertPuzzleToWallet(prefix, puzzleHash) { 
+   let data = {
+      "prefix": prefix,
+      "puzzleHash": puzzleHash
+   };
+   
+   axios.post(`${baseAllTheBlocksApiUrl}/atb/utilities/puzzlehash-to-address`, JSON.stringify(data))
+   .then(function (result) {
+      win.webContents.send('async-retrieve-wallet-addresses-reply', [result.data.address]); 
+   })
+   .catch(function (error) {
+      console.log(error.message);
+   });
+}
+
+function exportWalletToolDataFile() {
+   let filePaths = dialog.showOpenDialogSync(win, { 
+      title: 'Select a Destination',
+      buttonLabel: 'Export',
+      message: 'Please select the location to export the wallet tool data',
+      properties: ['openDirectory']
+   });
+
+   if (filePaths != undefined) {
+         logger.info('Sending async-export-wallet-tool-data event');
+         win.webContents.send('async-export-wallet-tool-data', [filePaths[0]]); 
+   }
+} 

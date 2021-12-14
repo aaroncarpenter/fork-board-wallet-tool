@@ -32,8 +32,8 @@ div.alert.dark-mode {
 }
 
 .card {
-   margin-bottom: 0.5rem;
-   
+   margin-bottom: 0.25rem;
+   margin-top: 0.25rem;   
 }
 
 .card-header {
@@ -42,20 +42,12 @@ div.alert.dark-mode {
    padding-left: 0.25rem;
 }
 
-.walletCard, i , #autoRefreshCheck{
-   cursor: pointer;
-}
-
 .card-body {
    padding: 0.5rem;
 }
 
 small {
    font-variant: small-caps;
-}
-
-.walletCard {
-   width: 350px;
 }
 
 .small-caps {
@@ -73,9 +65,12 @@ small {
  .dropdown-content {
    display: none;
    position: absolute;
-   background-color: #f1f1f1;
+   background-color: #e0dfdf;
    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
    z-index: 1;
+   overflow-y:auto;
+   overflow-x:hidden;
+   height: 200px;
  }
  
  /* Links inside the dropdown */
