@@ -14,9 +14,9 @@
 
    let coinConfigObj = [];
    let walletObj = [];
-   let selectedCoin = "";
+   let selectedCoins = [];
+   let selectedCoinsStr = "";
    let selectedDBFile = "";
-   let selectedCoinConfig = {};
 
 $(function () {
    logger.info('Sending async-get-blockchain-settings');
@@ -26,8 +26,8 @@ $(function () {
 // #region Page Event Handlers
 
 $('#retrieve-wallet-addresses').on('click', function () {
-   if (selectedCoin == "" || selectedDBFile == "") {
-      utils.showWarnMessage(logger, "You must first select a coin and a DB file before attempting to retrieval.", 2000);
+   if (selectedCoins.length == 0) {
+      utils.showWarnMessage(logger, "You must first select a coin before attempting to retrieval.", 2000);
    }
    else {
       walletObj = [];
@@ -36,7 +36,7 @@ $('#retrieve-wallet-addresses').on('click', function () {
 
       logger.info('Sending async-retrieve-wallet-addresses');
    
-      ipcRenderer.send('async-retrieve-wallet-addresses', [selectedCoinConfig.coinDisplayName, selectedCoinConfig.coinPrefix, selectedDBFile]); 
+      ipcRenderer.send('async-retrieve-wallet-addresses', [selectedCoins]); 
    }
 });
 
@@ -88,22 +88,42 @@ $('#db-path-button').on('click', function () {
 //    Args: N/A
 //  Return: N/A
 // ************************
-function updateSelectedCoin(coin) {
-   selectedCoin = coin;
+function updateSelectedCoin() {
+   selectedCoins = [];
+   selectedCoinsStr = "";
 
-   coinConfigObj.every(function (coinConfig) {      
-      if (coinConfig.coinDisplayName == selectedCoin) {
-         selectedCoinConfig = coinConfig;
-         return false;
+   $('.form-check-input:checked').each(function(index) {
+      let selectedVal = $(this).val();
+      coinConfigObj.every(function (coinConfig) {      
+         if (coinConfig.coinPathName == selectedVal) {
+            selectedCoins.push(coinConfig);
+            return false;
+         }
+
+         return true;
+      });
+   });
+
+   selectedCoins.every(function (selectedCoinCfg) {      
+      if (selectedCoinsStr.length != 0) {
+         selectedCoinsStr += ', ';
       }
+      selectedCoinsStr += selectedCoinCfg.coinDisplayName;
 
       return true;
    });
 
-   $('#coin-dropdown-button small').html(`Selected Coin: <br />${coin}`);
+   if (selectedCoinsStr == "") {
+      selectedCoinsStr = "None";
+   }
 
-   if (selectedCoin != "" && selectedDBFile != "") {
+   $('#coin-dropdown-button small').html(`Selected Coin${selectedCoinsStr.includes(',') ? 's' : ''}: <br />${selectedCoinsStr}`);
+
+   if (selectedCoins.length > 0) {
       $('#retrieve-wallet-addresses').removeClass('disabled');
+   }
+   else {
+      $('#retrieve-wallet-addresses').addClass('disabled');
    }
 
    $('#copy-wallet-addresses-to-clipboard').hide();
@@ -156,11 +176,18 @@ ipcRenderer.on('async-retrieve-wallet-addresses-error', (event, arg) => {
 ipcRenderer.on('async-retrieve-wallet-addresses-reply', (event, arg) => {
    logger.info('Received async-retrieve-wallet-addresses-reply');
  
-   if (arg.length == 1) {
-      let card = `<div class="walletCard col-md-6"><div class="card"><div class="card-header"><div style="width: 100%; text-align: center;"><small><b>Wallet Address</b></div></div><div class="card-body" style="text-align: center;"><small>${arg[0]}</small></div></div></div>`;
-      $('#wallet-address-cards').append(card);
+   if (arg.length == 2) {
+      let coinObj = arg[0];
+      let walletAddr = arg[1];
 
-      walletObj.push({ 'wallet': arg[0] });
+      if ($('#'+coinObj.coinPathName+'-wallet-address-card').length == 0) {
+         let card = `<div id="${coinObj.coinPathName}-wallet-address-card" class="walletCard col-md-6"><div class="card"><div class="card-header"><div style="width: 100%; text-align: center;"><small><b>${coinObj.coinDisplayName} Wallet Addresses</b></div></div><div class="card-body" style="text-align: center;"></div></div></div>`;
+         $('#wallet-address-cards').append(card);
+      }
+
+      $('#'+coinObj.coinPathName+'-wallet-address-card .card-body').append(`<p style="margin-bottom: 8px;"><small>${walletAddr}</small></p>`);
+
+      walletObj.push({ 'wallet': walletAddr });
 
       $('#copy-wallet-addresses-to-clipboard').show();
       $('#export-to-fork-board-import-file').show();
@@ -179,13 +206,13 @@ ipcRenderer.on('async-export-wallet-tool-data', (event, arg) => {
       let currDate = new Date();
       let currTimestamp = `${currDate.getFullYear()}${currDate.getMonth()}${currDate.getDate()}${currDate.getHours()}${currDate.getMinutes()}${currDate.getSeconds()}`;
 
-      let backupFilename = path.join(backupDest, `forkboard-wallettool-export-${selectedCoinConfig.coinPathName}-${currTimestamp}.json`);
+      let backupFilename = path.join(backupDest, `forkboard-wallettool-export-${currTimestamp}.json`);
       // write the walletObj to the backup location
 
       let backFileStr = `{
          "name": "ForkBoard Wallet Tool Export File",
          "date": "${currDate.toLocaleString('en-US')}",
-         "coinPath": "${selectedCoinConfig.coinPathName}",
+         "forks": "${selectedCoinsStr}",
          "walletConfiguration": ${JSON.stringify(walletObj, null, '\t')}
       }`;
       
@@ -221,9 +248,8 @@ ipcRenderer.on('async-get-blockchain-settings-reply', (event, arg) => {
 
       // Push data from args into the coinConfigObj
       coinConfigObj.every(function (coinConfig) {
-         let coin = `<div class="col-sm-4"><button  type="button" class="btn" style="padding-top: 5px; padding-bottom: 5px;" onclick="updateSelectedCoin('${coinConfig.coinDisplayName}')"><small>${coinConfig.coinDisplayName}</small></button></div>`;
-         $('#coin-dropdown-content').append(coin);
-
+         let coinDiv = `<div class="col-sm-2"><input class="form-check-input me-1" type="checkbox" onclick="updateSelectedCoin()" value="${coinConfig.coinPathName}" aria-label="..."><small>${coinConfig.coinDisplayName}</small></div>`;
+         $('#coin-dropdown-content').append(coinDiv);
          return true;
       });
    }

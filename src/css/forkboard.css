@@ -65,12 +65,12 @@ small {
  .dropdown-content {
    display: none;
    position: absolute;
-   background-color: #e0dfdf;
+   background-color: #c0c0c0;
    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
    z-index: 1;
    overflow-y:auto;
    overflow-x:hidden;
-   height: 200px;
+   height: 100px;
  }
  
  /* Links inside the dropdown */

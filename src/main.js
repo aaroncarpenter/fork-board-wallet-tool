@@ -35,6 +35,7 @@ axios.defaults.headers.post['Content-Type'] = 'application/json';
 const baseAllTheBlocksApiUrl = "https://api.alltheblocks.net";
 const baseForkBoardApi = "https://fork-board-api-mgmt.azure-api.net";
 
+let homeDir = app.getPath('home');
 // #endregion
 
 let appIcon = nativeImage.createFromPath('assets/icons/fork-board-wallet-tool-gray.png');
@@ -125,8 +126,18 @@ ipcMain.on('async-get-blockchain-settings', function (event, _arg) {
    logger.info(`Requesting data from ${url}`);
    axios.get(url)
    .then(function (result) {
+      let filteredResults = [];
+      result.data.every(function(item) {
+         let forkPath = getForkPath(item.pathName);
+         logger.info(`Checking fork path: ${forkPath}`);
+         if (fs.existsSync(forkPath)) {
+            filteredResults.push(item);     
+         }
+         return true;
+      });
+
       logger.info('Sending async-get-blockchain-settings-reply event');
-      event.sender.send('async-get-blockchain-settings-reply', result.data);
+      event.sender.send('async-get-blockchain-settings-reply', filteredResults);
    })
    .catch(function (error) {
       logger.error(error.message);
@@ -156,57 +167,40 @@ ipcMain.on('async-export-to-fork-board-import-file-action', function (_event, ar
 ipcMain.on('async-retrieve-wallet-addresses', function (event, arg) {
    logger.info('Received async-retrieve-wallet-addresses Event');
    
-   if (arg.length == 3) {
-      let coinDisplayName = arg[0].toLowerCase();
-      let coinPrefix = arg[1];
-      let dbFilename = arg[2];
+   if (arg.length == 1) {
+      let selectedCoins = arg[0];
 
-      // open the database
-      let db = new sqlite3.Database(dbFilename, sqlite3.OPEN_READWRITE, (err) => {
-         if (err) {
-            console.error(err.message);
-         }
-         console.log(`Connected to the ${dbFilename} database.`);
+      selectedCoins.every(function (selectedCoin){
+         console.log(`Retrieving wallet addresses for ${selectedCoin.coinDisplayName}.`);
+         let coinPathName = selectedCoin.coinPathName;
+   
+         let forkWalletDBPath = getForkWalletDBPath(coinPathName);
+         
+         // open the database
+         let db = new sqlite3.Database(forkWalletDBPath, sqlite3.OPEN_READWRITE, (err) => {
+            if (err) {
+               console.error(err.message);
+            }
+            console.log(`Connected to the ${forkWalletDBPath} database.`);
+         });
+
+         let forkWalletName = "";
+
+         db.all(`SELECT puzzle_hash, wallet_type, wallet_id, used FROM derivation_paths WHERE used = 1`, function(err, rows) {
+            if (err) {
+               console.error(err.message);
+            }
+            else {
+               rows.forEach(function (row) {
+                  convertPuzzleToWallet(selectedCoin, row.puzzle_hash);
+               });
+            }
+
+            closeDb(db);
+         });
+
+         return true;
       });
-
-      let posts = [];
-      let forkWalletName = "";
-
-      db.all(`SELECT id, name FROM users_wallets WHERE id = 1`, (err, rows) => {
-         if (err) {
-            console.error(err.message);
-         }
-         else {
-            rows.forEach(function (row) {
-               if (row.name != null) {
-                  forkWalletName = row.name.toLowerCase().replace("coin wallet", "");
-                  forkWalletName = forkWalletName.replace(" wallet", "");
-
-                  if (forkWalletName == coinDisplayName) {
-                     db.all(`SELECT puzzle_hash, wallet_type, wallet_id, used FROM derivation_paths WHERE used = 1`, function(err, rows) {
-                        if (err) {
-                           console.error(err.message);
-                        }
-                        else {
-                           rows.forEach(function (row) {
-                              convertPuzzleToWallet(coinPrefix, row.puzzle_hash);
-                           });
-                        }
-
-                        closeDb(db);
-                     });
-                  }
-                  else {
-                     let errMessage = `The selected ForkDB doesn't appear to match the selected Coin.  Selected Coin: ${coinDisplayName}, Selected Fork DB: ${forkWalletName}`;
-                     event.sender.send('async-retrieve-wallet-addresses-error', [errMessage]);
-                     
-                     closeDb(db);
-                  }
-               }
-            });
-         }
-          closeDb(db);
-      }); 
    }
 });
 
@@ -360,15 +354,15 @@ function selectForkDBPath() {
 // ************************
 // Purpose: This function handles the retrieving the walleta address from the puzzle hash.
 // ************************
-function convertPuzzleToWallet(prefix, puzzleHash) { 
+function convertPuzzleToWallet(coinObj, puzzleHash) { 
    let data = {
-      "prefix": prefix,
+      "prefix": coinObj.coinPrefix,
       "puzzleHash": puzzleHash
    };
    
    axios.post(`${baseAllTheBlocksApiUrl}/atb/utilities/puzzlehash-to-address`, JSON.stringify(data))
    .then(function (result) {
-      win.webContents.send('async-retrieve-wallet-addresses-reply', [result.data.address]); 
+      win.webContents.send('async-retrieve-wallet-addresses-reply', [coinObj, result.data.address]); 
    })
    .catch(function (error) {
       console.log(error.message);
@@ -388,3 +382,25 @@ function exportWalletToolDataFile() {
          win.webContents.send('async-export-wallet-tool-data', [filePaths[0]]); 
    }
 } 
+
+function getForkWalletDBPath(coinPath) {
+   let forkWalletFolder = `${getForkPath(coinPath)}\\mainnet\\wallet\\db`;
+   let forkWalletDBPath = "";
+   //C:\Users\amcar\.mogua\mainnet\wallet\db\blockchain_wallet_v1_mainnet_305296748.sqlite
+   let files = fs.readdirSync(forkWalletFolder);
+
+   for (let i=0; i<files.length; i++) {
+      let filename = files[i];
+
+      if (filename.includes("blockchain_wallet_v1_mainnet")) {
+         forkWalletDBPath = `${forkWalletFolder}\\${filename}`;
+         break;
+      }
+   }
+
+   return forkWalletDBPath;
+}
+
+function getForkPath(coinPath) {
+   return `${homeDir}\\.${coinPath}`;
+}
