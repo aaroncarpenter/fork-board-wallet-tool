@@ -16,11 +16,10 @@
    let walletObj = [];
    let selectedCoins = [];
    let selectedCoinsStr = "";
-   let selectedDBFile = "";
 
 $(function () {
    logger.info('Sending async-get-blockchain-settings');
-   ipcRenderer.send('async-get-blockchain-settings', [$('#db-path-text').text()]); 
+   ipcRenderer.send('async-get-blockchain-settings', []); 
 });
 
 // #region Page Event Handlers
@@ -30,19 +29,19 @@ $('#retrieve-wallet-addresses').on('click', function () {
       utils.showWarnMessage(logger, "You must first select a coin before attempting to retrieval.", 2000);
    }
    else {
+      // Clear the existing wallets
       walletObj = [];
-
       $('.walletCard').remove();
 
+      // Issue the retrieve wallet addresses event
       logger.info('Sending async-retrieve-wallet-addresses');
-   
       ipcRenderer.send('async-retrieve-wallet-addresses', [selectedCoins]); 
    }
 });
 
 $('#copy-wallet-addresses-to-clipboard').on('click', function () {
    let walletList = "";
-
+   // Iterate through the wallet object
    walletObj.every(function (walletItem) {
       if (walletList.length != 0) {
          walletList += ", ";
@@ -52,34 +51,13 @@ $('#copy-wallet-addresses-to-clipboard').on('click', function () {
       return true;
    });
 
+   // Write the text to clipboard
    clipboard.writeText(walletList);
 });
 
 $('#export-to-fork-board-import-file').on('click', function () {
    logger.info('Sending async-export-to-fork-board-import-file-action');
    ipcRenderer.send('async-export-to-fork-board-import-file-action', []); 
-});
-
-function pasteTextFromClipboard(elementId)
-{
-   let clipboardText = clipboard.readText();
-   let currWalletVal = $(elementId).val();
-
-   if (currWalletVal == null || currWalletVal == "") {
-      $(elementId).val(clipboardText);
-   }
-   else if (currWalletVal.endsWith(',') || currWalletVal.endsWith(', ')) {
-      $(elementId).val(`${currWalletVal}${clipboardText}`);
-   }
-   else {
-      $(elementId).val(`${currWalletVal}, ${clipboardText}`);
-   }
-}
-
-$('#db-path-button').on('click', function () { 
-   $('#copy-wallet-addresses-to-clipboard').hide();
-   $('#export-to-fork-board-import-file').hide();
-   ipcRenderer.send('async-open-db-path-dialog', []); 
 });
 
 // ***********************
@@ -89,9 +67,11 @@ $('#db-path-button').on('click', function () {
 //  Return: N/A
 // ************************
 function updateSelectedCoin() {
+   // Clear global vars
    selectedCoins = [];
    selectedCoinsStr = "";
 
+   // Iterate through all checked coins and push those coin's config objects to the selectedCoins object array
    $('.form-check-input:checked').each(function(index) {
       let selectedVal = $(this).val();
       coinConfigObj.every(function (coinConfig) {      
@@ -104,6 +84,7 @@ function updateSelectedCoin() {
       });
    });
 
+   // Iterate through the selectedCoins object array to build a comma separated list of coins
    selectedCoins.every(function (selectedCoinCfg) {      
       if (selectedCoinsStr.length != 0) {
          selectedCoinsStr += ', ';
@@ -113,12 +94,15 @@ function updateSelectedCoin() {
       return true;
    });
 
+   // Set to None if no coins selected
    if (selectedCoinsStr == "") {
       selectedCoinsStr = "None";
    }
 
+   // Set the page element
    $('#coin-dropdown-button small').html(`Selected Coin${selectedCoinsStr.includes(',') ? 's' : ''}: <br />${selectedCoinsStr}`);
 
+   // Activate the retrieve button only if one or more coins is selected
    if (selectedCoins.length > 0) {
       $('#retrieve-wallet-addresses').removeClass('disabled');
    }
@@ -126,34 +110,16 @@ function updateSelectedCoin() {
       $('#retrieve-wallet-addresses').addClass('disabled');
    }
 
+   // Hide action buttons
    $('#copy-wallet-addresses-to-clipboard').hide();
    $('#export-to-fork-board-import-file').hide();
+
+   // Remove existing wallet cards if coin selection changes.
    $('.walletCard').remove();
 }
 // #endregion
 
 // #region Async Event Handlers
-
-// ************************
-// Purpose: This function is a handler for an event from ipcMain, triggered when the user picks a fork DB 
-// ************************
-ipcRenderer.on('async-set-db-path-action', (event, arg) => {
-   logger.info('Received async-set-db-path-action');
- 
-   if (arg.length == 1) {
-      let dbFileName = arg[0];
-
-      $('#db-path-button small').html(`Selected Fork DB: <br /> ${dbFileName}`);
-
-      selectedDBFile = dbFileName;
-
-      if (selectedCoin != "" && selectedDBFile != "") {
-         $('#retrieve-wallet-addresses').removeClass('disabled');
-      }
-
-      $('.walletCard').remove();
-   }
-});
 
 // ************************
 // Purpose: This function is a handler for an event from ipcMain, triggered when the user picks a fork DB 
@@ -171,7 +137,7 @@ ipcRenderer.on('async-retrieve-wallet-addresses-error', (event, arg) => {
 });
 
 // ************************
-// Purpose: This function is a handler for an event from ipcMain, triggered when the user picks a fork DB 
+// Purpose: This function is a handler for an event from ipcMain, triggered when the walleta ddress is retrieved
 // ************************
 ipcRenderer.on('async-retrieve-wallet-addresses-reply', (event, arg) => {
    logger.info('Received async-retrieve-wallet-addresses-reply');
@@ -180,13 +146,16 @@ ipcRenderer.on('async-retrieve-wallet-addresses-reply', (event, arg) => {
       let coinObj = arg[0];
       let walletAddr = arg[1];
 
+      // create coin wallet card container if not found
       if ($('#'+coinObj.coinPathName+'-wallet-address-card').length == 0) {
          let card = `<div id="${coinObj.coinPathName}-wallet-address-card" class="walletCard col-md-6"><div class="card"><div class="card-header"><div style="width: 100%; text-align: center;"><small><b>${coinObj.coinDisplayName} Wallet Addresses</b></div></div><div class="card-body" style="text-align: center;"></div></div></div>`;
          $('#wallet-address-cards').append(card);
       }
 
+      // append the wallet address
       $('#'+coinObj.coinPathName+'-wallet-address-card .card-body').append(`<p style="margin-bottom: 8px;"><small>${walletAddr}</small></p>`);
 
+      // store address value to obj
       walletObj.push({ 'wallet': walletAddr });
 
       $('#copy-wallet-addresses-to-clipboard').show();
@@ -195,27 +164,29 @@ ipcRenderer.on('async-retrieve-wallet-addresses-reply', (event, arg) => {
 });
 
 // ************************
-// Purpose: This function is a handler for an event from ipcMain, triggered when the user picks a fork DB 
+// Purpose: This function is a handler for an event from ipcMain, triggered when the user selects the wallet export location.
 // ************************
 ipcRenderer.on('async-export-wallet-tool-data', (event, arg) => {
    logger.info('Received async-export-wallet-tool-data');
  
    if (arg.length == 1) {
-      let backupDest = arg[0];
-
+      // Generate a timestamp string
       let currDate = new Date();
       let currTimestamp = `${currDate.getFullYear()}${currDate.getMonth()}${currDate.getDate()}${currDate.getHours()}${currDate.getMinutes()}${currDate.getSeconds()}`;
 
+      // Set the filename
+      let backupDest = arg[0];
       let backupFilename = path.join(backupDest, `forkboard-wallettool-export-${currTimestamp}.json`);
-      // write the walletObj to the backup location
-
+      
+      // format export file
       let backFileStr = `{
          "name": "ForkBoard Wallet Tool Export File",
          "date": "${currDate.toLocaleString('en-US')}",
          "forks": "${selectedCoinsStr}",
          "walletConfiguration": ${JSON.stringify(walletObj, null, '\t')}
       }`;
-      
+
+      // write the walletObj to the backup location
       fs.writeFileSync(backupFilename, backFileStr);
 
       utils.showWarnMessage(logger, `Successfully created export file - ${backupFilename}`, 4000);
@@ -244,9 +215,10 @@ ipcRenderer.on('async-get-blockchain-settings-reply', (event, arg) => {
          return true;
       });
 
+      // sort the array on name
       coinConfigObj.sort(utils.applySort('coinDisplayName', 'asc'));
 
-      // Push data from args into the coinConfigObj
+      // For all returned coins, create checkbox entries in the dropdown content div
       coinConfigObj.every(function (coinConfig) {
          let coinDiv = `<div class="col-sm-2"><input class="form-check-input me-1" type="checkbox" onclick="updateSelectedCoin()" value="${coinConfig.coinPathName}" aria-label="..."><small>${coinConfig.coinDisplayName}</small></div>`;
          $('#coin-dropdown-content').append(coinDiv);

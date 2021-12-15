@@ -122,14 +122,18 @@ ipcMain.on('async-get-blockchain-settings', function (event, _arg) {
    logger.info('Received async-get-blockchain-settings event');
 
    let url = `${baseForkBoardApi}/fork-board/config`;
-
    logger.info(`Requesting data from ${url}`);
+
+   // Get the blockchain settings
    axios.get(url)
    .then(function (result) {
       let filteredResults = [];
       result.data.every(function(item) {
+         // Define the expected fork path
          let forkPath = getForkPath(item.pathName);
          logger.info(`Checking fork path: ${forkPath}`);
+
+         // If fork path exists on the local machine, then push blockchain settings object to the filtered results array.  This filters out blockchains that don't exist on the current machine.
          if (fs.existsSync(forkPath)) {
             filteredResults.push(item);     
          }
@@ -143,14 +147,6 @@ ipcMain.on('async-get-blockchain-settings', function (event, _arg) {
       logger.error(error.message);
       event.sender.send('async-get-blockchain-settings-error', [error.message]);
    });
-});
-
-// ************************
-// Purpose: This function handles retrieving the wallet addresses
-// ************************
-ipcMain.on('async-open-db-path-dialog', function (_event, arg) {
-   logger.info('Received async-open-db-path-dialog Event');
-   selectForkDBPath();
 });
 
 // ************************
@@ -170,10 +166,12 @@ ipcMain.on('async-retrieve-wallet-addresses', function (event, arg) {
    if (arg.length == 1) {
       let selectedCoins = arg[0];
 
+      // Iterate through the selectedCoins object
       selectedCoins.every(function (selectedCoin){
          console.log(`Retrieving wallet addresses for ${selectedCoin.coinDisplayName}.`);
          let coinPathName = selectedCoin.coinPathName;
    
+         // Get the full path to the wallet db
          let forkWalletDBPath = getForkWalletDBPath(coinPathName);
          
          // open the database
@@ -184,8 +182,7 @@ ipcMain.on('async-retrieve-wallet-addresses', function (event, arg) {
             console.log(`Connected to the ${forkWalletDBPath} database.`);
          });
 
-         let forkWalletName = "";
-
+         // Run the query
          db.all(`SELECT puzzle_hash, wallet_type, wallet_id, used FROM derivation_paths WHERE used = 1`, function(err, rows) {
             if (err) {
                console.error(err.message);
