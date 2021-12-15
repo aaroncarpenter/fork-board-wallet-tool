@@ -6,6 +6,7 @@ const {
    MenuItem,
    ipcMain,
    dialog,
+   nativeImage
 } = require('electron');
 const url = require('url');
 const path = require('path');
@@ -263,8 +264,8 @@ const template = [
          {
             label: 'Contribute on GitHub',
             click() {
-               logger.info('Opening ForkBoard Github in Browser');
-               require("electron").shell.openExternal('https://github.com/aaroncarpenter/fork-board');
+               logger.info('Opening ForkBoard Wallet Tool Github in Browser');
+               require("electron").shell.openExternal('https://github.com/aaroncarpenter/fork-board-wallet-tool');
             }
          },
          {
@@ -280,8 +281,8 @@ const template = [
          {
             label: 'Report an Issue',
             click() {
-               logger.info('Opening ForkBoard Issues in Browser');
-               require("electron").shell.openExternal('https://github.com/aaroncarpenter/fork-board/issues');
+               logger.info('Opening ForkBoard Wallet Tool Issues in Browser');
+               require("electron").shell.openExternal('https://github.com/aaroncarpenter/fork-board-wallet-tool/issues');
             }
          },
          {

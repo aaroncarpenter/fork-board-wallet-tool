@@ -220,7 +220,7 @@ ipcRenderer.on('async-get-blockchain-settings-reply', (event, arg) => {
 
       // For all returned coins, create checkbox entries in the dropdown content div
       coinConfigObj.every(function (coinConfig) {
-         let coinDiv = `<div class="col-sm-2"><input class="form-check-input me-1" type="checkbox" onclick="updateSelectedCoin()" value="${coinConfig.coinPathName}" aria-label="..."><small>${coinConfig.coinDisplayName}</small></div>`;
+         let coinDiv = `<div class="col-lg-2 col-md-4 col-sm-6"><input class="form-check-input me-1" type="checkbox" onclick="updateSelectedCoin()" value="${coinConfig.coinPathName}" aria-label="..."><small>${coinConfig.coinDisplayName}</small></div>`;
          $('#coin-dropdown-content').append(coinDiv);
          return true;
       });
