@@ -6,7 +6,6 @@ const {
    MenuItem,
    ipcMain,
    dialog,
-   nativeImage
 } = require('electron');
 const url = require('url');
 const path = require('path');
@@ -15,7 +14,6 @@ const fs = require('fs');
 const https = require('https');
 const logger = require('electron-log');
 const sqlite3 = require('sqlite3').verbose();
-let { bech32, bech32m } = require('bech32');
 
 let logPath = path.resolve(__dirname, '../logs');
 // Create log folder if missing
