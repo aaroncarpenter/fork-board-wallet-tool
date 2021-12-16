@@ -122,10 +122,10 @@ function updateSelectedCoin() {
 // #region Async Event Handlers
 
 // ************************
-// Purpose: This function is a handler for an event from ipcMain, triggered when the user picks a fork DB 
+// Purpose: This function is a handler for an error event from ipcMain
 // ************************
-ipcRenderer.on('async-retrieve-wallet-addresses-error', (event, arg) => {
-   logger.info('Received async-retrieve-wallet-addresses-error');
+ipcRenderer.on('async-report-error', (event, arg) => {
+   logger.info('Received async-report-error');
  
    if (arg.length == 1) {
       let errMsg = arg[0];

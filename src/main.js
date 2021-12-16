@@ -173,29 +173,34 @@ ipcMain.on('async-retrieve-wallet-addresses', function (event, arg) {
          // Get the full path to the wallet db
          let forkWalletDBPath = getForkWalletDBPath(coinPathName);
          
-         // open the database
-         let db = new sqlite3.Database(forkWalletDBPath, sqlite3.OPEN_READWRITE, (err) => {
-            if (err) {
-               console.error(err.message);
-            }
-            console.log(`Connected to the ${forkWalletDBPath} database.`);
-         });
+         if (fs.existsSync(forkWalletDBPath)) {
+            // open the database
+            let db = new sqlite3.Database(forkWalletDBPath, sqlite3.OPEN_READWRITE, (err) => {
+               if (err) {
+                  console.error(err.message);
+               }
+               console.log(`Connected to the ${forkWalletDBPath} database.`);
+            });
 
-         // Run the query
-         db.all(`SELECT puzzle_hash, wallet_type, wallet_id, used FROM derivation_paths WHERE used = 1`, function(err, rows) {
-            if (err) {
-               console.error(err.message);
-            }
-            else {
-               rows.forEach(function (row) {
-                  convertPuzzleToWallet(selectedCoin, row.puzzle_hash);
-               });
-            }
+            // Run the query
+            db.all(`SELECT puzzle_hash, wallet_type, wallet_id, used FROM derivation_paths WHERE used = 1`, function(err, rows) {
+               if (err) {
+                  console.error(err.message);
+               }
+               else {
+                  rows.forEach(function (row) {
+                     convertPuzzleToWallet(selectedCoin, row.puzzle_hash);
+                  });
+               }
 
-            closeDb(db);
-         });
+               closeDb(db);
+            });
 
-         return true;
+            return true;
+         }
+         else {
+            win.webContents.send('async-report-error', [`Unable to locate Fork DB: ${forkWalletDBPath}`]);
+         }
       });
    }
 });
@@ -361,7 +366,8 @@ function convertPuzzleToWallet(coinObj, puzzleHash) {
       win.webContents.send('async-retrieve-wallet-addresses-reply', [coinObj, result.data.address]); 
    })
    .catch(function (error) {
-      console.log(error.message);
+      logger.error(error.message);
+      win.webContents.send('async-report-error', [error.message]);
    });
 }
 
@@ -380,23 +386,45 @@ function exportWalletToolDataFile() {
 } 
 
 function getForkWalletDBPath(coinPath) {
-   let forkWalletFolder = `${getForkPath(coinPath)}\\mainnet\\wallet\\db`;
+   let forkWalletFolder = "";
    let forkWalletDBPath = "";
-   //C:\Users\amcar\.mogua\mainnet\wallet\db\blockchain_wallet_v1_mainnet_305296748.sqlite
-   let files = fs.readdirSync(forkWalletFolder);
+   if(process.platform == 'win32') {
+      forkWalletFolder = `${getForkPath(coinPath)}\\mainnet\\wallet\\db`;
+   }
+   else {
+      forkWalletFolder = `${getForkPath(coinPath)}/mainnet/wallet/db`;
+   }
 
-   for (let i=0; i<files.length; i++) {
-      let filename = files[i];
+   if (fs.existsSync(forkWalletFolder)) {
+      let files = fs.readdirSync(forkWalletFolder);
 
-      if (filename.includes("blockchain_wallet_v1_mainnet")) {
-         forkWalletDBPath = `${forkWalletFolder}\\${filename}`;
-         break;
+      for (let i=0; i<files.length; i++) {
+         let filename = files[i];
+
+         if (filename.includes("blockchain_wallet_v1_mainnet")) {
+            if(process.platform == 'win32') {
+               forkWalletDBPath = `${forkWalletFolder}\\${filename}`;
+            }
+            else {
+               forkWalletDBPath = `${forkWalletFolder}/${filename}`;
+            }
+            break;
+         }
       }
+   }
+   else {
+      logger.info('Sending aasync-report-error event');
+      win.webContents.send('async-report-error', [`Unable to locate Fork DB Folder: ${forkWalletFolder}`]);
    }
 
    return forkWalletDBPath;
 }
 
 function getForkPath(coinPath) {
-   return `${homeDir}\\.${coinPath}`;
+   if(process.platform == 'win32') {
+      return `${homeDir}\\.${coinPath}`;
+   }
+   else {
+      return `${homeDir}/.${coinPath}`;
+   }
 }
