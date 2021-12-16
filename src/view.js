@@ -172,7 +172,7 @@ ipcRenderer.on('async-export-wallet-tool-data', (event, arg) => {
    if (arg.length == 1) {
       // Generate a timestamp string
       let currDate = new Date();
-      let currTimestamp = `${currDate.getFullYear()}${currDate.getMonth()}${currDate.getDate()}${currDate.getHours()}${currDate.getMinutes()}${currDate.getSeconds()}`;
+      let currTimestamp = `${currDate.getFullYear()}${(currDate.getMonth()+1 < 10 ? '0' : '')}${currDate.getMonth()+1}${(currDate.getDate()+1 < 10 ? '0' : '')}${currDate.getDate()}${(currDate.getHours()+1 < 10 ? '0' : '')}${currDate.getHours()}${(currDate.getMinutes()+1 < 10 ? '0' : '')}${currDate.getMinutes()}${(currDate.getSeconds()+1 < 10 ? '0' : '')}${currDate.getSeconds()}`;
 
       // Set the filename
       let backupDest = arg[0];
