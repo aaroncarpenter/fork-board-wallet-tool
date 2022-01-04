@@ -47,7 +47,7 @@ function createWindow() {
    logger.info('Inside CreateWindow() function');
    win = new BrowserWindow({
       width: 1200,
-      height: 600,
+      height: 850,
       webPreferences: {
          nodeIntegration: true,
          contextIsolation: false,
@@ -128,13 +128,27 @@ ipcMain.on('async-get-blockchain-settings', function (event, _arg) {
    .then(function (result) {
       let filteredResults = [];
       result.data.every(function(item) {
+         let pathName = item.pathName;
+
+         // Silicoin override
+         if (item.programName == 'sit') {
+            pathName = item.programName;
+         }
+
          // Define the expected fork path
-         let forkPath = getForkPath(item.pathName);
+         let forkPath = getForkPath(pathName);
+
          logger.info(`Checking fork path: ${forkPath}`);
 
          // If fork path exists on the local machine, then push blockchain settings object to the filtered results array.  This filters out blockchains that don't exist on the current machine.
          if (fs.existsSync(forkPath)) {
-            filteredResults.push(item);     
+            filteredResults.push({
+               coinPrefix: item.coinPrefix,
+               pathName: pathName,
+               displayName: item.displayName,
+               mojoPerCoin: item.mojoPerCoin,
+               hidden: item.hidden
+            });     
          }
          return true;
       });

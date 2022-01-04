@@ -7,7 +7,7 @@
       <link rel = "stylesheet" href = "./css/forkboard.css" />
    </head>
    
-   <body>
+   <body style="overflow-y: hidden;">
       <div class="container-fluid" style="padding-left: 5px; padding-right: 5px; border-bottom: 1px gray solid;">
          <div id="infoAlertBox" class="alert alert-info" style="display: none" role="alert"></div>
          <div id="warnAlertBox" class="alert alert-warning" style="display: none" role="alert"></div>
@@ -64,7 +64,7 @@
       </div>
       <div class = "container-fluid">
          <p>
-            <div id="wallet-address-cards" class="d-flex row justify-content-center container-fluid" style="vertical-align:bottom; ; margin-left: 0px;""></div>  
+            <div id="wallet-address-cards" class="d-flex row justify-content-center container-fluid" style="vertical-align:bottom; ; margin-left: 0px; height: 545px; overflow-y: auto;"></div>  
          </p>
       </div>
       <script src = "./view.js" ></script>

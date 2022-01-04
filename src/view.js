@@ -224,9 +224,15 @@ ipcRenderer.on('async-get-blockchain-settings-reply', (event, arg) => {
          $('#coin-dropdown-content').append(coinDiv);
          return true;
       });
+
+      if (coinConfigObj.length == 0) {
+         let coinDiv = `<div class="col-lg-2 col-md-4 col-sm-6"><small>No forks were found in your home directory.</small></div>`;
+         $('#coin-dropdown-content').append(coinDiv);
+      }
    }
    else {
-      logger.error('Reply args incorrect');
+      let coinDiv = `<div class="col-lg-4 col-md-6 col-sm-8"><small>No forks were found in your home directory.</small></div>`;
+      $('#coin-dropdown-content').append(coinDiv);
    }
 });
 
