@@ -40,6 +40,9 @@ let homeDir = app.getPath('home');
 let appIcon = nativeImage.createFromPath('assets/icons/fork-board-wallet-tool-gray.png');
 let displayTheme;
 
+// quit if startup from squirrel installation.
+if (require('electron-squirrel-startup')) return app.quit();
+
 // #region Main Window
 let win;
 
