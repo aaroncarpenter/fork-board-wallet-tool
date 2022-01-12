@@ -43,6 +43,9 @@ let displayTheme;
 // quit if startup from squirrel installation.
 if (require('electron-squirrel-startup')) return app.quit();
 
+//disable hardware based acceleration
+app.disableHardwareAcceleration();
+
 // #region Main Window
 let win;
 
