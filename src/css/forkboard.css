@@ -67,11 +67,11 @@ small {
    display: none;
    position: absolute;
    background-color: #f1f1f1;
-   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+   box-shadow: 4px 8px 16px 4px rgba(0,0,0,0.2);
    z-index: 1;
    overflow-y:auto;
    overflow-x:hidden;
-   height: 100px;
+   min-height: 50px;
  }
  
  /* Links inside the dropdown */
@@ -92,4 +92,4 @@ small {
  .dropdown:hover .dropdown-content {display: block;}
  
  /* Change the background color of the dropdown button when the dropdown content is shown */
- /*.dropdown:hover .dropbtn {background-color: #3e8e41;}*/
+ .dropdown:hover .dropbtn {background-color: #3e8e41;}

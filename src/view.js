@@ -39,6 +39,14 @@ $('#retrieve-wallet-addresses').on('click', function () {
    }
 });
 
+$('#coin-selectall-button').on('click', function () {
+     // Iterate through all checked coins and push those coin's config objects to the selectedCoins object array
+   $('.form-check-input:not(:checked)').each(function(index) {
+     $(this).prop("checked", true);
+   });
+   updateSelectedCoin();
+});
+
 $('#copy-wallet-addresses-to-clipboard').on('click', function () {
    let walletList = "";
    // Iterate through the wallet object
