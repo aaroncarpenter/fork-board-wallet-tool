@@ -26,7 +26,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "jquery": "^3.6.0",
     "sqlite3": "^5.0.2",
-    "tar": "4.4.18"
+    "tar": "^4.4.18"
   },
   "devDependencies": {
     "electron": "^15.3.0"
