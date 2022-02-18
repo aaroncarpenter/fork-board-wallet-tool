@@ -121,6 +121,54 @@ ipcMain.on('close-about-page', function (_event, _arg) {
 });
 
 // ************************
+// Purpose: This function handles the async-get-exchange-rates event from the Renderer.  It retrieves the exchange rates from the ForkBoard API and sends the reply event with the data to the Renderer.
+// ************************
+ipcMain.on('async-check-latest-app-version', function (event, arg) {
+   logger.info('Received async-check-latest-app-version event');
+ 
+   let url = 'https://api.github.com/repos/aaroncarpenter/fork-board-wallet-tool/releases/latest';
+   
+   logger.info(`Requesting data from ${url}`);
+   axios.get(url)
+   .then(function (result) {
+      let latestVersion = result.data.tag_name.replace('v', '');
+   
+      if (versionCompare(app.getVersion(), latestVersion) < 0)
+      {
+         let data = {
+            "currentVersion" : app.getVersion(),
+            "latestVersion" : latestVersion,
+            "publishedDate" : result.data.published_at,
+            "releaseNotes" : result.data.body
+         };
+
+         result.data.assets.every((asset) => {
+            if (asset.browser_download_url.includes(".exe"))
+            {
+               data.downloadURL_Windows = asset.browser_download_url;
+            }
+            else if (asset.browser_download_url.includes(".dmg"))
+            {
+               data.downloadURL_MacOS = asset.browser_download_url;
+            }
+            else if (asset.browser_download_url.includes(".zip"))
+            {
+               data.downloadURL_Ubuntu = asset.browser_download_url;
+            }
+            return true;
+         });
+
+         logger.info('Sending async-check-latest-app-version-reply event');
+         event.sender.send('async-check-latest-app-version-reply', [data]);
+      }  
+   })
+   .catch(function (error) {
+      logger.error(error.message);
+      event.sender.send('async-check-latest-app-version-error', [error.message]);
+   });
+});
+
+// ************************
 // Purpose: This function handles the async-get-blockchain-settings event from the Renderer.  It retrieves the block chain settings from ATB and sends the reply event with the data to the Renderer.
 // ************************
 ipcMain.on('async-get-blockchain-settings', function (event, _arg) {
@@ -447,4 +495,51 @@ function getForkPath(coinPath) {
    else {
       return `${homeDir}/.${coinPath}`;
    }
+}
+
+function versionCompare(v1, v2, options) {
+   var lexicographical = options && options.lexicographical,
+       zeroExtend = options && options.zeroExtend,
+       v1parts = v1.split('.'),
+       v2parts = v2.split('.');
+
+   function isValidPart(x) {
+       return (lexicographical ? /^\d+[A-Za-z]*$/ : /^\d+$/).test(x);
+   }
+
+   if (!v1parts.every(isValidPart) || !v2parts.every(isValidPart)) {
+       return NaN;
+   }
+
+   if (zeroExtend) {
+       while (v1parts.length < v2parts.length) v1parts.push("0");
+       while (v2parts.length < v1parts.length) v2parts.push("0");
+   }
+
+   if (!lexicographical) {
+       v1parts = v1parts.map(Number);
+       v2parts = v2parts.map(Number);
+   }
+
+   for (var i = 0; i < v1parts.length; ++i) {
+       if (v2parts.length == i) {
+           return 1;
+       }
+
+       if (v1parts[i] == v2parts[i]) {
+           continue;
+       }
+       else if (v1parts[i] > v2parts[i]) {
+           return 1;
+       }
+       else {
+           return -1;
+       }
+   }
+
+   if (v1parts.length != v2parts.length) {
+       return -1;
+   }
+
+   return 0;
 }

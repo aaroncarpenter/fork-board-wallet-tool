@@ -18,6 +18,9 @@
    let selectedCoinsStr = "";
 
 $(function () {
+   logger.info('Sending async-check-latest-app-version event');
+   ipcRenderer.send('async-check-latest-app-version', []);
+
    logger.info('Sending async-get-blockchain-settings');
    ipcRenderer.send('async-get-blockchain-settings', []); 
 });
@@ -241,6 +244,72 @@ ipcRenderer.on('async-get-blockchain-settings-reply', (event, arg) => {
    else {
       let coinDiv = `<div class="col-lg-4 col-md-6 col-sm-8"><small>No forks were found in your home directory.</small></div>`;
       $('#coin-dropdown-content').append(coinDiv);
+   }
+});
+
+// ************************
+// Purpose: This function receives the version information reply from ipcMain, checks latest version against current version.
+// ************************
+ipcRenderer.on('async-check-latest-app-version-reply', (event, arg) => {
+   logger.info('Received async-check-latest-app-version-reply event')
+
+   if (arg.length == 1) {
+      let replyData = arg[0];
+      let message = `You are currently running ForkBoard Wallet Tool v${replyData.currentVersion}.  An updated version (<i><b>v${replyData.latestVersion}</b></i>) was released on ${new Date(replyData.publishedDate).toLocaleString('en-US')}.  Click to the right to download the latest versions.`;
+      let instructions = replyData.releaseNotes;
+
+      $('#infoVersionMessage').html(message);
+      $('#infoVersionNotes').html(`<br><u><b>ForkBoard Wallet Toolv${replyData.latestVersion} Release Notes</b></u><br>${instructions}`);
+
+      //$('#version-download-buttons').append(`<small class="text-muted">Downloads</small>`);
+      $('#version-download-buttons').append(`<div><a href="${replyData.downloadURL_Windows}" class="btn btn-primary"><small>Windows</small></a></div>`);
+      $('#version-download-buttons').append(`<div><a href="${replyData.downloadURL_MacOS}" class="btn btn-primary"><small>MacOS</small></a></div>`);
+      $('#version-download-buttons').append(`<div><a href="${replyData.downloadURL_Ubuntu}" class="btn btn-primary"><small>Ubuntu</small></a></div>`);
+
+      $('#infoVersionBox').fadeIn(400, 'swing');
+      
+      setTimeout(
+         function () {
+            $('#infoVersionBox').fadeOut(400, 'swing');
+         }, 10000
+      );
+   }
+   else {
+      logger.error('Reply args incorrect');
+   }
+});
+
+// ************************
+// Purpose: This function receives the exchange rates error from ipcMain.
+// ************************
+ipcRenderer.on('async-check-latest-app-version-error', (event, arg) => {
+   logger.info('Received async-check-latest-app-version-error event')
+   
+   if (arg.length == 1) {
+      let errMsg = arg[0];
+      let message = `There was an error getting the latest App Version Information from Github.  The reported error is "${errMsg}".`;
+      let instructions = 'Please restart the application.  Reach out to us on Discord or log an issue in Github if the issue continue.';
+      utils.showErrorMessage(logger, message, instructions);
+   }
+   else {
+      logger.error('Reply args incorrect');
+   }
+});
+
+// ************************
+// Purpose: This function receives the blockchain settings error from ipcMain.
+// ************************
+ipcRenderer.on('async-get-blockchain-settings-error', (event, arg) => {
+   logger.info('Received async-get-blockchain-settings-error event')
+   
+   if (arg.length = 1) {
+      let errMsg = arg[0];
+      let message = `There was an error getting the Blockchain Settings Information.  The reported error is "${errMsg}".`;
+      let instructions = 'Please restart the application.  Reach out to us on Discord or log an issue in Github if the issue continue.';
+      utils.showErrorMessage(logger, message, instructions);
+   }
+   else {
+      logger.error('Reply args incorrect');
    }
 });
 

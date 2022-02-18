@@ -22,7 +22,23 @@
                <div class="d-flex justify-content-center col-sm-4">
                   <div id="reload-button" class="btn btn-primary" style="width: 100%"><small>Reload</small></div>
                </div>
+            </div>
          </div>
+         <div id="infoVersionBox" class="alert alert-info" style="display: none;" role="alert">
+            <div class="d-flex justify-content-between row">
+               <div class="d-flex justify-content-center col-sm-11">
+                  <div class="d-flex row">
+                     <div><small class="text-muted" id="infoVersionMessage"></small></div>
+
+                     <div><small class="text-muted" id="infoVersionNotes"></small></div>
+                     
+                     <div><br /><small class="text-muted"><b>This message will auto-hide in 10 seconds.</b></small></div>
+                  </div>
+               </div>
+               <div class="d-flex col-sm-1">
+                  <div class="d-flex row" id="version-download-buttons"></div>
+               </div>
+            </div>
          </div>
          <div style="padding: 10px;">
             <p>
@@ -30,7 +46,7 @@
                   <div class="d-flex justify-content-center" style="width: 100%">
                      <div id="coin-dropdown" class="dropdown" style="width: 100%">
                         <div id="coin-dropdown-button" class="btn btn-primary dropbtn" style="width: 100%"><small>Selected Coin: <br />None</small> </div>
-                        <div class="dropdown-content" style="width: 100%; padding-right: 5px;">
+                        <div class="dropdown-content" style="width: 100%; padding-right: 5px; padding-left: 10px;">
                            <div class="d-flex row align-items-center">
                               <div class="col-md-10"> 
                                  <div class="d-flex row" id="coin-dropdown-content"> </div>
