@@ -4,7 +4,7 @@
   "description": "An ElectronJS App to assist with retrieving used wallet addresses directly from the Chia and Forks DBs.",
   "keywords": [],
   "main": "./src/main.js",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "Aaron Carpenter",
   "scripts": {
     "start": "electron .",
