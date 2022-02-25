@@ -125,8 +125,8 @@ ipcMain.on('close-about-page', function (_event, _arg) {
 // ************************
 ipcMain.on('async-check-latest-app-version', function (event, arg) {
    logger.info('Received async-check-latest-app-version event');
- 
-   let url = 'https://api.github.com/repos/aaroncarpenter/fork-board-wallet-tool/releases/latest';
+   
+   let url = `${baseForkBoardApi}/version-check?repositoryName=fork-board-wallet-tool`;
    
    logger.info(`Requesting data from ${url}`);
    axios.get(url)
@@ -151,7 +151,7 @@ ipcMain.on('async-check-latest-app-version', function (event, arg) {
             {
                data.downloadURL_MacOS = asset.browser_download_url;
             }
-            else if (asset.browser_download_url.includes(".zip"))
+            else if (asset.browser_download_url.includes(".zip") || asset.browser_download_url.includes(".deb"))
             {
                data.downloadURL_Ubuntu = asset.browser_download_url;
             }
