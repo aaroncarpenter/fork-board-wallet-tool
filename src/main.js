@@ -32,7 +32,7 @@ axios.defaults.httpsAgent = new https.Agent({
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 const baseAllTheBlocksApiUrl = "https://api.alltheblocks.net";
-const baseForkBoardApi = "https://fork-board-api-mgmt.azure-api.net";
+const baseForkBoardApi = "https://fork-board-api-mgmt.azure-api.net/fork-board";
 
 let homeDir = app.getPath('home');
 // #endregion
@@ -174,7 +174,7 @@ ipcMain.on('async-check-latest-app-version', function (event, arg) {
 ipcMain.on('async-get-blockchain-settings', function (event, _arg) {
    logger.info('Received async-get-blockchain-settings event');
 
-   let url = `${baseForkBoardApi}/fork-board/config`;
+   let url = `${baseForkBoardApi}/config`;
    logger.info(`Requesting data from ${url}`);
 
    // Get the blockchain settings
@@ -469,7 +469,7 @@ function getForkWalletDBPath(coinPath) {
       for (let i=0; i<files.length; i++) {
          let filename = files[i];
 
-         if (filename.includes("blockchain_wallet_v1_mainnet")) {
+         if (filename.includes("blockchain_wallet_v1_mainnet") || filename.includes("blockchain_wallet_v2_mainnet")) {
             if(process.platform == 'win32') {
                forkWalletDBPath = `${forkWalletFolder}\\${filename}`;
             }
