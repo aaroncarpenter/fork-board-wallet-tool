@@ -464,12 +464,13 @@ function getForkWalletDBPath(coinPath) {
    }
 
    if (fs.existsSync(forkWalletFolder)) {
+      logger.info(`Reading files from ${forkWalletFolder}`);
       let files = fs.readdirSync(forkWalletFolder);
 
       for (let i=0; i<files.length; i++) {
          let filename = files[i];
 
-         if (filename.includes("blockchain_wallet_v1_mainnet") || filename.includes("blockchain_wallet_v2_mainnet")) {
+         if (filename.includes("blockchain_wallet_v1") || filename.includes("blockchain_wallet_v2")) {
             if(process.platform == 'win32') {
                forkWalletDBPath = `${forkWalletFolder}\\${filename}`;
             }
@@ -489,11 +490,17 @@ function getForkWalletDBPath(coinPath) {
 }
 
 function getForkPath(coinPath) {
+   var coinPathStr = coinPath;
+   if (coinPathStr == 'seno')
+   {
+      coinPathStr = 'seno2'
+   }
+
    if(process.platform == 'win32') {
-      return `${homeDir}\\.${coinPath}`;
+      return `${homeDir}\\.${coinPathStr}`;
    }
    else {
-      return `${homeDir}/.${coinPath}`;
+      return `${homeDir}/.${coinPathStr}`;
    }
 }
 
