@@ -456,33 +456,25 @@ function exportWalletToolDataFile() {
 function getForkWalletDBPath(coinPath) {
    let forkWalletFolder = "";
    let forkWalletDBPath = "";
-   if(process.platform == 'win32') {
-      forkWalletFolder = `${getForkPath(coinPath)}\\mainnet\\wallet\\db`;
-   }
-   else {
-      forkWalletFolder = `${getForkPath(coinPath)}/mainnet/wallet/db`;
-   }
 
-   // special handling for Chinilla
-   if (coinPathStr == 'chinilla')
-   {
-      forkWalletFolder = forkWalletFolder.replace('mainnet', 'vanillanet');
-   }
+   let srcpath = getForkPath(coinPath);
+   const forkPath = fs.readdirSync(srcpath)
+        .map(file => path.join(srcpath, file))
+        .filter(path => fs.statSync(path).isDirectory());
+
+   forkWalletFolder = path.join(forkPath[0], 'wallet', 'db');
 
    if (fs.existsSync(forkWalletFolder)) {
       logger.info(`Reading files from ${forkWalletFolder}`);
       let files = fs.readdirSync(forkWalletFolder);
 
-      for (let i=0; i<files.length; i++) {
+      for (let i=0; i<files.length; i++) 
+      {
          let filename = files[i];
 
-         if (filename.includes("blockchain_wallet_v1") || filename.includes("blockchain_wallet_v2")) {
-            if(process.platform == 'win32') {
-               forkWalletDBPath = `${forkWalletFolder}\\${filename}`;
-            }
-            else {
-               forkWalletDBPath = `${forkWalletFolder}/${filename}`;
-            }
+         if (filename.includes("blockchain_wallet_v1") || filename.includes("blockchain_wallet_v2")) 
+         {
+            forkWalletDBPath = path.join(forkWalletFolder, filename);
             break;
          }
       }
@@ -502,12 +494,7 @@ function getForkPath(coinPath) {
       coinPathStr = 'seno2'
    }
 
-   if(process.platform == 'win32') {
-      return `${homeDir}\\.${coinPathStr}`;
-   }
-   else {
-      return `${homeDir}/.${coinPathStr}`;
-   }
+   return path.join(homeDir, `.${coinPathStr}`);
 }
 
 function versionCompare(v1, v2, options) {

@@ -8,18 +8,27 @@
   "author": "Aaron Carpenter",
   "scripts": {
     "start": "electron .",
-    "package-win": "electron-packager . ForkBoardWalletTool --overwrite --win32 --x64 --icon=assets/icons/fork-board-wallet-tool-gray.ico --prune=true --out=./out --ignore=^/assets/config --ignore=^/logs",
+/*    "package-win": "electron-packager . ForkBoardWalletTool --overwrite --win32 --x64 --icon=assets/icons/fork-board-wallet-tool-gray.ico --prune=true --out=./out --ignore=^/assets/config --ignore=^/logs",
     "installer-win": "electron-installer-windows --src ./out/ForkBoardWalletTool-win32-x64 --dest ./out/installers --icon=assets/icons/fork-board-wallet-tool-gray.ico",
     "package-mac": "electron-packager . ForkBoardWalletTool --overwrite --darwin --x64 --icon=assets/icons/fork-board-wallet-tool-gray.icns --prune=true --out=./out --ignore=^/assets/config --ignore=^/logs",
     "installer-mac": "electron-installer-dmg ./out/ForkBoardWalletTool-darwin-x64/fork-board-wallet-tool.app ForkBoardWalletTool",
     "package-linux": "electron-packager . ForkBoardWalletTool --overwrite --linux --x64 --icon=assets/icons/fork-board-wallet-tool-gray.png --prune=true --out=./out --ignore=^/assets/config --ignore=^/logs",
     "installer-deb": "electron-installer-debian --src ./out/ForkBoardWalletTool-linux-x64 --dest ./out/installers/ --arch amd64 --icon=assets/icons/fork-board-wallet-tool-gray.png"
-  },
+*/  
+    "package-win": "electron-packager . ForkBoardWalletTool --overwrite --win32 --x64 --icon=assets/icons/fork-board-wallet-tool-gray.ico --prune=true --out=./out/win --ignore=^/assets/config --ignore=^/logs",
+    "installer-win": "electron-installer-windows --src ./out/win/ForkBoardWalletTool-win32-x64 --dest ./out/win/ForkBoardWalletTool-%npm_package_version%-x64 --icon=assets/icons/fork-board-wallet-tool-gray.ico",
+    "package-mac-arm64": "electron-packager . ForkBoardWalletTool --darwin --arm64 --out=./out/arm64/ --icon=assets/icons/fork-board-wallet-tool-gray.icns --overwrite=true --prune=true --ignore=^/assets/config --ignore=^/logs",
+    "installer-mac-arm64": "electron-installer-dmg out/arm64/ForkBoardWalletTool-darwin-x64/fork-board-wallet-tool.app out/arm64/ForkBoardWalletTool-arm64",
+    "package-mac-x64": "electron-packager . ForkBoardWalletTool --darwin --x64 --out=./out/x64/ --icon=assets/icons/fork-board-wallet-tool-gray.icns --overwrite=true --prune=true --ignore=^/assets/config --ignore=^/logs",
+    "installer-mac-x64": "electron-installer-dmg out/x64/ForkBoardWalletTool-darwin-x64/fork-board-wallet-tool.app out/x64/ForkBoardWalletTool-x64",
+    "package-deb": "electron-packager . ForkBoardWalletTool --overwrite --linux --x64 --icon=assets/icons/fork-board-wallet-tool-gray.png --prune=true --out=./out/deb --ignore=^/assets/config --ignore=^/logs",
+    "installer-deb": "electron-installer-debian --src ./out/deb/ForkBoardWalletTool-linux-x64 --dest ./out/deb/ForkBoardWalletTool-$npm_package_version-x64 --arch amd64 --icon=assets/icons/fork-board-wallet-tool-gray.png  --overwrite=true"
+},
   "dependencies": {
+    "electron": "^15.3.0",
     "axios": "^0.24.0",
     "bech32": "^2.0.0",
     "bootstrap": "^5.1.3",
-    "electron-installer-windows": "^3.0.0",
     "electron-log": "^4.4.1",
     "electron-packager": "^15.4.0",
     "electron-prompt": "^1.7.0",
