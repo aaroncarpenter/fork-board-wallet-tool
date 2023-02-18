@@ -8,13 +8,6 @@
   "author": "Aaron Carpenter",
   "scripts": {
     "start": "electron .",
-/*    "package-win": "electron-packager . ForkBoardWalletTool --overwrite --win32 --x64 --icon=assets/icons/fork-board-wallet-tool-gray.ico --prune=true --out=./out --ignore=^/assets/config --ignore=^/logs",
-    "installer-win": "electron-installer-windows --src ./out/ForkBoardWalletTool-win32-x64 --dest ./out/installers --icon=assets/icons/fork-board-wallet-tool-gray.ico",
-    "package-mac": "electron-packager . ForkBoardWalletTool --overwrite --darwin --x64 --icon=assets/icons/fork-board-wallet-tool-gray.icns --prune=true --out=./out --ignore=^/assets/config --ignore=^/logs",
-    "installer-mac": "electron-installer-dmg ./out/ForkBoardWalletTool-darwin-x64/fork-board-wallet-tool.app ForkBoardWalletTool",
-    "package-linux": "electron-packager . ForkBoardWalletTool --overwrite --linux --x64 --icon=assets/icons/fork-board-wallet-tool-gray.png --prune=true --out=./out --ignore=^/assets/config --ignore=^/logs",
-    "installer-deb": "electron-installer-debian --src ./out/ForkBoardWalletTool-linux-x64 --dest ./out/installers/ --arch amd64 --icon=assets/icons/fork-board-wallet-tool-gray.png"
-*/  
     "package-win": "electron-packager . ForkBoardWalletTool --overwrite --win32 --x64 --icon=assets/icons/fork-board-wallet-tool-gray.ico --prune=true --out=./out/win --ignore=^/assets/config --ignore=^/logs",
     "installer-win": "electron-installer-windows --src ./out/win/ForkBoardWalletTool-win32-x64 --dest ./out/win/ForkBoardWalletTool-%npm_package_version%-x64 --icon=assets/icons/fork-board-wallet-tool-gray.ico",
     "package-mac-arm64": "electron-packager . ForkBoardWalletTool --darwin --arm64 --out=./out/arm64/ --icon=assets/icons/fork-board-wallet-tool-gray.icns --overwrite=true --prune=true --ignore=^/assets/config --ignore=^/logs",
