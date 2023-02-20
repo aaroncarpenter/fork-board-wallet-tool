@@ -27,18 +27,18 @@ jobs:
     - name: Package ForkBoard
       run: yarn installer-win
     - name: rename output articfact
-      run: mv ./out/win/ForkBoardWalletTool-$env:FBVERSION-x64/ForkBoardWalletTool-$env:FBVERSION-setup.exe ./out/win/ForkBoardWalletTool-$env:FBVERSION-x64/ForkBoardWalletTool-$env:FBVERSION-x64.exe
+      run: mv ./dist/ForkBoardWalletTool-$env:FBVERSION-x64/ForkBoardWalletTool-$env:FBVERSION-setup.exe ./dist/ForkBoardWalletTool-$env:FBVERSION-x64/ForkBoardWalletTool-$env:FBVERSION-x64.exe
 #    - name: Upload Installer
 #      uses: actions/upload-artifact@v3
 #      with:
 #        name: windows-x64-installer
-#        path: ./out/win/ForkBoard-0.1.5-x64/ForkBoard-0.1.5-x64.exe
+#        path: ./dist/ForkBoard-0.1.5-x64/ForkBoard-0.1.5-x64.exe
 #        retention-days: 10
     - name: Upload release binary
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ github.token }}
-        file: ./out/win/ForkBoardWalletTool-0.1.5-x64/ForkBoardWalletTool-0.1.5-x64.exe
+        file: ./dist/ForkBoardWalletTool-0.1.5-x64/ForkBoardWalletTool-0.1.5-x64.exe
         asset_name: ForkBoardWalletTool-0.1.5-x64.exe
         tag: v0.1.5
         overwrite: true
@@ -60,18 +60,18 @@ jobs:
     - name: Package ForkBoard for Mac (arm64)
       run: yarn installer-mac-arm64
     - name: rename output artifact (arm64)
-      run: mv ./out/arm64/ForkBoardWalletTool-arm64.dmg ./out/arm64/ForkBoardWalletTool-$FBVERSION-arm64.dmg
+      run: mv ./dist/ForkBoardWalletTool-arm64.dmg ./dist/ForkBoardWalletTool-$FBVERSION-arm64.dmg
 #    - name: Upload Installer (arm64)
 #      uses: actions/upload-artifact@v3
 #      with:
 #        name: mac-arm64-installer
-#        path: ./out/arm64/ForkBoardWalletTool-0.1.5-arm64.dmg
+#        path: ./dist/ForkBoardWalletTool-0.1.5-arm64.dmg
 #        retention-days: 10
     - name: Upload release binary (arm64)
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ github.token }}
-        file: ./out/arm64/ForkBoardWalletTool-0.1.5-arm64.dmg
+        file: ./dist/ForkBoardWalletTool-0.1.5-arm64.dmg
         asset_name: ForkBoardWalletTool-0.1.5-arm64.dmg
         tag: v0.1.5
         overwrite: true
@@ -93,18 +93,18 @@ jobs:
     - name: Package ForkBoard for Mac (x64)
       run: yarn installer-mac-x64
     - name: rename output artifact (x64)
-      run: mv ./out/x64/ForkBoardWalletTool-x64.dmg ./out/x64/ForkBoardWalletTool-$FBVERSION-x64.dmg
+      run: mv ./dist/ForkBoardWalletTool-x64.dmg ./dist/ForkBoardWalletTool-$FBVERSION-x64.dmg
 #    - name: Upload Installer (x64)
 #      uses: actions/upload-artifact@v3
 #      with:
 #        name: mac-x64-installer
-#        path: ./out/x64/ForkBoardWalletTool-0.1.5-x64.dmg
+#        path: ./dist/ForkBoardWalletTool-0.1.5-x64.dmg
 #        retention-days: 10
     - name: Upload release binary (x64)
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ github.token }}
-        file: ./out/x64/ForkBoardWalletTool-0.1.5-x64.dmg
+        file: ./dist/ForkBoardWalletTool-0.1.5-x64.dmg
         asset_name: ForkBoardWalletTool-0.1.5-x64.dmg
         tag: v0.1.5
         overwrite: true
@@ -126,18 +126,18 @@ jobs:
     - name: Package ForkBoard for Ubuntu
       run: yarn installer-deb
     - name: rename output articfact
-      run: mv ./out/deb/ForkBoardWalletTool-$FBVERSION-x64/forkboardwallettool_0.1.5_amd64.deb ./out/deb/ForkBoardWalletTool-$FBVERSION-x64/ForkBoardWalletTool-$FBVERSION-x64.deb
+      run: mv ./dist/ForkBoardWalletTool-$FBVERSION-x64/forkboardwallettool_0.1.5_amd64.deb ./dist/ForkBoardWalletTool-$FBVERSION-x64/ForkBoardWalletTool-$FBVERSION-x64.deb
 #    - name: Upload Installer
 #      uses: actions/upload-artifact@v3
 #      with:
 #        name: mac-deb-installer
-#        path: ./out/deb/ForkBoardWalletTool-0.1.5-x64/ForkBoardWalletTool-0.1.5-x64.deb
+#        path: ./dist/ForkBoardWalletTool-0.1.5-x64/ForkBoardWalletTool-0.1.5-x64.deb
 #        retention-days: 10
     - name: Upload release binary (arm64)
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ github.token }}
-        file: ./out/deb/ForkBoardWalletTool-0.1.5-x64/ForkBoardWalletTool-0.1.5-x64.deb
+        file: ./dist/ForkBoardWalletTool-0.1.5-x64/ForkBoardWalletTool-0.1.5-x64.deb
         asset_name: ForkBoardWalletTool-0.1.5-x64.deb
         tag: v0.1.5
         overwrite: true
