@@ -27,7 +27,7 @@ jobs:
     - name: Package ForkBoard
       run: yarn installer-win
     - name: rename output articfact
-      run: mv ./dist/ForkBoardWalletTool-$env:FBVERSION-x64/ForkBoardWalletTool-$env:FBVERSION-setup.exe ./dist/ForkBoardWalletTool-$env:FBVERSION-x64/ForkBoardWalletTool-$env:FBVERSION-x64.exe
+      run: mv ./dist/ForkBoardWalletTool-$env:FBVERSION-setup.exe ./dist/ForkBoardWalletTool-$env:FBVERSION-x64.exe
 #    - name: Upload Installer
 #      uses: actions/upload-artifact@v3
 #      with:
@@ -38,7 +38,7 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ github.token }}
-        file: ./dist/ForkBoardWalletTool-0.1.5-x64/ForkBoardWalletTool-0.1.5-x64.exe
+        file: ./dist/ForkBoardWalletTool-0.1.5-x64.exe
         asset_name: ForkBoardWalletTool-0.1.5-x64.exe
         tag: v0.1.5
         overwrite: true
