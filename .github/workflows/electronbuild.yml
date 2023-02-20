@@ -26,16 +26,10 @@ jobs:
       run: yarn package-win
     - name: Package ForkBoard
       run: yarn installer-win
-    - name: See Directory
-      run: ls ./dist
+#    - name: See Directory
+#      run: ls ./dist
     - name: rename output artifact
       run: mv ./dist/ForkBoardWalletTool-$env:FBVERSION-setup.exe ./dist/ForkBoardWalletTool-$env:FBVERSION-x64.exe
-#    - name: Upload Installer
-#      uses: actions/upload-artifact@v3
-#      with:
-#        name: windows-x64-installer
-#        path: ./dist/ForkBoard-0.1.5-x64/ForkBoard-0.1.5-x64.exe
-#        retention-days: 10
     - name: Upload release binary
       uses: svenstaro/upload-release-action@v2
       with:
@@ -61,16 +55,10 @@ jobs:
       run: yarn package-mac-arm64
     - name: Package ForkBoard for Mac (arm64)
       run: yarn installer-mac-arm64
-    - name: See Directory
-      run: ls ./dist
+#    - name: See Directory
+#      run: ls ./dist
     - name: rename output artifact (arm64)
       run: mv ./dist/ForkBoardWalletTool.dmg ./dist/ForkBoardWalletTool-$FBVERSION-arm64.dmg
-#    - name: Upload Installer (arm64)
-#      uses: actions/upload-artifact@v3
-#      with:
-#        name: mac-arm64-installer
-#        path: ./dist/ForkBoardWalletTool-0.1.5-arm64.dmg
-#        retention-days: 10
     - name: Upload release binary (arm64)
       uses: svenstaro/upload-release-action@v2
       with:
@@ -96,16 +84,10 @@ jobs:
       run: yarn package-mac-x64
     - name: Package ForkBoard for Mac (x64)
       run: yarn installer-mac-x64
-    - name: See Directory
-      run: ls ./dist
+#    - name: See Directory
+#      run: ls ./dist
     - name: rename output artifact (x64)
       run: mv ./dist/ForkBoardWalletTool.dmg ./dist/ForkBoardWalletTool-$FBVERSION-x64.dmg
-#    - name: Upload Installer (x64)
-#      uses: actions/upload-artifact@v3
-#      with:
-#        name: mac-x64-installer
-#        path: ./dist/ForkBoardWalletTool-0.1.5-x64.dmg
-#        retention-days: 10
     - name: Upload release binary (x64)
       uses: svenstaro/upload-release-action@v2
       with:
@@ -131,21 +113,15 @@ jobs:
       run: yarn package-deb
     - name: Package ForkBoard for Ubuntu
       run: yarn installer-deb
-    - name: See Directory
-      run: ls ./dist
+#    - name: See Directory
+#      run: ls ./dist
     - name: rename output artifact
-      run: mv ./dist/ForkBoardWalletTool-$FBVERSION-x64/forkboardwallettool_0.1.5_amd64.deb ./dist/ForkBoardWalletTool-$FBVERSION-x64/ForkBoardWalletTool-$FBVERSION-x64.deb
-#    - name: Upload Installer
-#      uses: actions/upload-artifact@v3
-#      with:
-#        name: mac-deb-installer
-#        path: ./dist/ForkBoardWalletTool-0.1.5-x64/ForkBoardWalletTool-0.1.5-x64.deb
-#        retention-days: 10
+      run: mv ./dist/forkboardwallettool_0.1.5_amd64.deb ./dist/ForkBoardWalletTool-$FBVERSION-x64.deb
     - name: Upload release binary (arm64)
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ github.token }}
-        file: ./dist/ForkBoardWalletTool-0.1.5-x64/ForkBoardWalletTool-0.1.5-x64.deb
+        file: ./dist/ForkBoardWalletTool-0.1.5-x64.deb
         asset_name: ForkBoardWalletTool-0.1.5-x64.deb
         tag: v0.1.5
         overwrite: true
