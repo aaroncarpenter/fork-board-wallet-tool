@@ -26,7 +26,9 @@ jobs:
       run: yarn package-win
     - name: Package ForkBoard
       run: yarn installer-win
-    - name: rename output articfact
+    - name: See Directory
+      run: ls ./dist
+    - name: rename output artifact
       run: mv ./dist/ForkBoardWalletTool-$env:FBVERSION-setup.exe ./dist/ForkBoardWalletTool-$env:FBVERSION-x64.exe
 #    - name: Upload Installer
 #      uses: actions/upload-artifact@v3
@@ -59,6 +61,8 @@ jobs:
       run: yarn package-mac-arm64
     - name: Package ForkBoard for Mac (arm64)
       run: yarn installer-mac-arm64
+    - name: See Directory
+      run: ls ./dist
     - name: rename output artifact (arm64)
       run: mv ./dist/ForkBoardWalletTool-arm64.dmg ./dist/ForkBoardWalletTool-$FBVERSION-arm64.dmg
 #    - name: Upload Installer (arm64)
@@ -92,6 +96,8 @@ jobs:
       run: yarn package-mac-x64
     - name: Package ForkBoard for Mac (x64)
       run: yarn installer-mac-x64
+    - name: See Directory
+      run: ls ./dist
     - name: rename output artifact (x64)
       run: mv ./dist/ForkBoardWalletTool-x64.dmg ./dist/ForkBoardWalletTool-$FBVERSION-x64.dmg
 #    - name: Upload Installer (x64)
@@ -125,7 +131,9 @@ jobs:
       run: yarn package-deb
     - name: Package ForkBoard for Ubuntu
       run: yarn installer-deb
-    - name: rename output articfact
+    - name: See Directory
+      run: ls ./dist
+    - name: rename output artifact
       run: mv ./dist/ForkBoardWalletTool-$FBVERSION-x64/forkboardwallettool_0.1.5_amd64.deb ./dist/ForkBoardWalletTool-$FBVERSION-x64/ForkBoardWalletTool-$FBVERSION-x64.deb
 #    - name: Upload Installer
 #      uses: actions/upload-artifact@v3
