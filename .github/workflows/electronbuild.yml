@@ -64,7 +64,7 @@ jobs:
     - name: See Directory
       run: ls ./dist
     - name: rename output artifact (arm64)
-      run: mv ./dist/ForkBoardWalletTool-arm64.dmg ./dist/ForkBoardWalletTool-$FBVERSION-arm64.dmg
+      run: mv ./dist/ForkBoardWalletTool.dmg ./dist/ForkBoardWalletTool-$FBVERSION-arm64.dmg
 #    - name: Upload Installer (arm64)
 #      uses: actions/upload-artifact@v3
 #      with:
@@ -99,7 +99,7 @@ jobs:
     - name: See Directory
       run: ls ./dist
     - name: rename output artifact (x64)
-      run: mv ./dist/ForkBoardWalletTool-x64.dmg ./dist/ForkBoardWalletTool-$FBVERSION-x64.dmg
+      run: mv ./dist/ForkBoardWalletTool.dmg ./dist/ForkBoardWalletTool-$FBVERSION-x64.dmg
 #    - name: Upload Installer (x64)
 #      uses: actions/upload-artifact@v3
 #      with:
