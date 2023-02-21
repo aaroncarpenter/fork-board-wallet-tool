@@ -464,6 +464,12 @@ function getForkWalletDBPath(coinPath) {
 
    forkWalletFolder = path.join(forkPath[0], 'wallet', 'db');
 
+   // special handling for Chinilla
+   if (coinPath == 'chinilla')
+   {
+      forkWalletFolder = forkWalletFolder.replace('mainnet', 'vanillanet');
+   }
+
    if (fs.existsSync(forkWalletFolder)) {
       logger.info(`Reading files from ${forkWalletFolder}`);
       let files = fs.readdirSync(forkWalletFolder);
